@@ -228,3 +228,87 @@ vagrant@controller:/etc/ansible$ cat npm-playbook.yml
     apt: pkg=npm state=present
 
 ```
+
+
+
+### Configuration of mongodb:
+- Install mongodb in db server
+
+- ![](../Images/mongod.conf%20playbook.png)
+
+- Check the status of mongodb from controller
+-![](../Images/status%20mongod-2.png)
+
+
+- Now, run playbook to configure mongodb:
+- This is the same playbook that we ran above
+```
+---
+# host name
+- hosts: db
+
+
+
+ gather_facts: yes
+
+
+
+#admin access
+  become: yes
+
+
+
+
+# add set of instructions
+  tasks:
+  - name: set up Mongodb in db server
+    apt: pkg=mongodb state=present
+
+
+
+ - name: remove mongodb file (delete file)
+    file:
+      path: /etc/mongodb.conf
+      state: absent
+
+
+
+ - name: Touch a file, using symbolic modes to set the permissions (equival)
+    file:
+      path: /etc/mongodb.conf
+      state: touch
+      mode: u=rw,g=r,o=r
+
+
+
+ - name: Insert multiple lines and backup
+    blockinfile:
+      path: /etc/mongodb.conf
+      backup: yes
+      block: |
+        "storage:
+          dbPath: /var/lib/mongodb
+          journal:
+            enabled: true
+        systemLog:
+          destination: file
+          logAppend: true
+          path: /var/log/mongodb/mongod.log
+        net:
+          port: 27017
+          bindIp: 0.0.0.0"
+
+```
+![](../Images/new%20mongod%20playbook%20run%20-3.png)
+
+- Agai check the status
+![](../Images/check%20mongod.conf%20file-4.png)
+
+
+
+
+### Set-up Hybrid environment:
+
+- Create a directory from /etc/ansible as shown in below:
+- 
+![](../Images/create%20directory%20for%20pass.yml%20-5.png)
